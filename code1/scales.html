@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 04.04 - Mesh normal material</title>
+    <script type="text/javascript" src="../libs/three2.js"></script>
+
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/CanvasRenderer.js"></script>
+    <script type="text/javascript" src="../libs/Projector.js"></script>
+
+    <style>
+        body {
+
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+
+        var stats = initStats();
+        //创建场景
+        var scene = new THREE.Scene();
+
+        // 创建相机
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // 渲染器大小的设置
+        var renderer;
+        var webGLRenderer = new THREE.WebGLRenderer();
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+        webGLRenderer.shadowMapEnabled = true;
+
+        var canvasRenderer = new THREE.CanvasRenderer();
+        canvasRenderer.setSize(window.innerWidth, window.innerHeight);
+        renderer = webGLRenderer;
+
+        var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
+        var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({color: 0x777777}));
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.position.y = -20;
+        scene.add(groundMesh);
+
+        var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
+        var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
+        var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
+
+
+        var meshMaterial = new THREE.MeshNormalMaterial({color: 0x7777ff});
+        var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
+        var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
+        var plane = new THREE.Mesh(planeGeometry, meshMaterial);
+
+        // 球的位置
+        sphere.position.x = 0;
+        sphere.position.y = 3;
+        sphere.position.z = 2;
+
+        for (var f = 0, fl = sphere.geometry.faces.length; f < fl; f++) {
+            var face = sphere.geometry.faces[f];
+            var centroid = new THREE.Vector3(0, 0, 0);
+            centroid.add(sphere.geometry.vertices[face.a]);
+            centroid.add(sphere.geometry.vertices[face.b]);
+            centroid.add(sphere.geometry.vertices[face.c]);
+            centroid.divideScalar(3);
+
+            var arrow = new THREE.ArrowHelper(
+                face.normal,
+                centroid,
+                2,
+                0xff0000,
+                0.5,
+                0.5);
+            sphere.add(arrow);
+        }
+
+
+        cube.position = sphere.position;
+        plane.position = sphere.position;
+
+
+        // add the sphere to the scene
+        scene.add(cube);
+
+        // 相机位置
+        camera.position.x = -20;
+        camera.position.y = 60;
+        camera.position.z = 40;
+        camera.lookAt(scene.position);
+
+        var axi =new THREE.AxisHelper(20);
+
+        scene.add(axi);
+
+        // 漫反射光源
+        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+        scene.add(ambientLight);
+
+        // 可以产生阴影的光源
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-40, 60, -10);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // 把渲染输出到HTML元素中
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+
+        var group = new THREE.Mesh();
+        // add all the rubik cube elements
+        var mats = [];
+        mats.push(new THREE.MeshBasicMaterial({color: 0x009e60}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0x009e60}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xff5806}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xff5800}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xC41E3A}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xC41E3A}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xffffff}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xffffff}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xffd500}));
+        mats.push(new THREE.MeshBasicMaterial({color: 0xffd500}));
+
+
+        var faceMaterial = new THREE.MeshFaceMaterial(mats);
+
+        for (var x = 0; x < 4; x++) {
+            for (var y = 0; y < 4; y++) {
+                for (var z = 0; z < 4; z++) {
+                    var cubeGeom = new THREE.BoxGeometry(3.9, 3.9, 3.9);
+                    var cube1 = new THREE.Mesh(cubeGeom, faceMaterial);
+                    cube1.position.set(x * 4+15 , y * 4-4, z * 4);
+                    group.add(cube1);
+                }
+            }
+        }
+        scene.add(group);
+        // 着色部分
+
+        var step = 0;
+        var step1 = 0;
+        var oldContext = null;
+
+        var controls = new function () {
+            this.rotationSpeed = 0.02;
+            this.scale_x = 1;
+            this.scale_y = 1;
+            this.scale_z = 1;
+            this.mofangrotationSpeed = 0.03;
+
+            this.bouncingSpeed = 0.03;
+
+            this.opacity = meshMaterial.opacity;
+            this.transparent = meshMaterial.transparent;
+
+            this.visible = meshMaterial.visible;
+            this.side = "front";
+
+            this.wireframe = meshMaterial.wireframe;
+            this.wireframeLinewidth = meshMaterial.wireframeLinewidth;
+
+            this.selectedMesh = "cube";
+
+            this.shadow = "flat";
+
+
+            this.numberOfObjects = scene.children.length;
+
+
+        };
+
+        var gui = new dat.GUI();
+
+        gui.add(controls, 'mofangrotationSpeed', 0, 0.5);
+        gui.add(controls, "scale_x");
+        gui.add(controls, "scale_y");
+        gui.add(controls, "scale_z");
+
+        /*gui.add(controls, "rotatetion",0 , 1);*/
+        var spGui = gui.addFolder("Mesh");
+        spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
+            meshMaterial.opacity = e
+        });
+        spGui.add(controls, 'transparent').onChange(function (e) {
+            meshMaterial.transparent = e
+        });
+        spGui.add(controls, 'wireframe').onChange(function (e) {
+            meshMaterial.wireframe = e
+        });
+        spGui.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
+            meshMaterial.wireframeLinewidth = e
+        });
+        spGui.add(controls, 'visible').onChange(function (e) {
+            meshMaterial.visible = e
+        });
+        spGui.add(controls, 'side', ["front", "back", "double"]).onChange(function (e) {
+            console.log(e);
+            switch (e) {
+                case "front":
+                    meshMaterial.side = THREE.FrontSide;
+                    break;
+                case "back":
+                    meshMaterial.side = THREE.BackSide;
+                    break;
+                case "double":
+                    meshMaterial.side = THREE.DoubleSide;
+                    break;
+            }
+            meshMaterial.needsUpdate = true;
+
+        });
+        spGui.add(controls, 'shadow', ["flat", "smooth"]).onChange(function (e) {
+            switch (e) {
+                case "flat":
+                    meshMaterial.shading = THREE.FlatShading;
+                    break;
+                case "smooth":
+                    meshMaterial.shading = THREE.SmoothShading;
+                    break;
+            }
+
+            var oldPos = sphere.position.clone();
+            scene.remove(sphere);
+            scene.remove(plane);
+            scene.remove(cube);
+            sphere = new THREE.Mesh(sphere.geometry.clone(), meshMaterial);
+            cube = new THREE.Mesh(cube.geometry.clone(), meshMaterial);
+            plane = new THREE.Mesh(plane.geometry.clone(), meshMaterial);
+
+
+            sphere.position = oldPos;
+            cube.position = oldPos;
+            plane.position = oldPos;
+
+            switch (controls.selectedMesh) {
+                case "cube":
+                    scene.add(cube);
+
+                    break;
+                case "sphere":
+                    scene.add(sphere);
+
+                    break;
+                case "plane":
+                    scene.add(plane);
+                    break;
+
+            }
+
+            meshMaterial.needsUpdate = true;
+            console.log(meshMaterial);
+        });
+
+        spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
+
+            scene.remove(plane);
+            scene.remove(cube);
+            scene.remove(sphere);
+
+
+            switch (e) {
+                case "cube":
+                    scene.add(cube);
+
+                    break;
+                case "sphere":
+                    scene.add(sphere);
+
+                    break;
+                case "plane":
+                    scene.add(plane);
+                    break;
+
+            }
+
+            scene.add(e);
+        });
+
+        render();
+
+        function render() {
+            stats.update();
+
+            //cube.rotation.y = step += 0.01;
+            // plane.rotation.y = step;
+            // sphere.rotation.y = step;
+
+            cube.scale.set(controls.scale_x, controls.scale_y, controls.scale_z);
+
+
+           // cube1.rotation.y = step1 += 0.02;
+           // group.rotation.y = step1 += controls.mofangrotationSpeed;
+
+            // 使用动画
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); // 0: fps, 1: ms
+
+
+            // HTML元素靠近left和top
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+        }
+    };
+
+    window.onload = init;
+
+
+</script>
+</body>
+</html>

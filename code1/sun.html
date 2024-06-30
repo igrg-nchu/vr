@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script type="module" src="../libs/three.js"></script>
+    <script src="../libs/OrbitControls.js"></script>
+    <script src="../libs/CSS2DRenderer.js"></script>
+
+    <script>
+    //声明全局变量
+    let camera,scene,renderer,labelRenderer;
+    let moon,earth;
+    let clock = new THREE.Clock();
+
+    const textureloader = new THREE.TextureLoader();
+    function init(){
+        //地球半径大小
+        const EARTH_RADIUS =2.5;
+        const  MOON_RADIUS =0.27;
+        //实例化相机
+        camera = THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,1000);
+        camera.position.set(10,5,20);
+
+        //实例化场景
+        scene = new THREE.Scene();
+        //创建聚光的的光源
+        const dirLIght = new THREE.spotLight(0xffffff);
+        dirLIght.position.set(-40,30,60);
+        dirLIght.intensity = 2;
+        dirLIght.castShadow = true ;
+        scene.add(dirLIght);
+
+       const moonGeometry = new THREE.SphereGeometry(MOON_RADIUS);
+       const moonMaterial = new THREE.MeshPhongMaterial({
+           map:textureloader.load('../assets')
+       })
+        moon = new THREE.Mesh(moonGeometry,moonMaterial);
+       scene.add(moon);
+       renderer = new THREE.WebGLRenderer({});
+       renderer.setPixelRatio();
+       renderer.setSize(window.innerWidth,window.innerHeight);
+       //渲染阴影
+        renderer.shadowMapEnabled = true;
+    }
+    </script>
+</head>
+<body>
+
+</body>
+</html>

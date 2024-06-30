@@ -1,0 +1,259 @@
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td {
+    margin: 0;
+    padding: 0;
+}
+body {
+    min-width: 1200px;
+    font-size: 12px;
+    font-family: "Microsoft YaHei",Arial;
+    color: #333;
+    background-color: #f5f5f5;
+    overflow: auto;
+}
+a {
+    text-decoration: none;
+}
+
+ul, ol {
+    list-style: none;
+}
+/**********************************header start**************************/
+header {
+    width: 100%;
+    height: 80px;
+    background-color: #ffffff;
+    vertical-align: middle;
+
+}
+.timi{
+    overflow: hidden;
+    width: 80%;
+    height: 80px;
+    margin: 0 auto;
+}
+.logo{
+    float: left;
+    margin-top: 10px;
+}
+nav {
+    display: inline-block;
+    margin-left: 140PX;
+    box-sizing: border-box;
+    line-height: 80px;
+}
+
+nav a {
+    font-size: 20px;
+    font-weight: bolder;
+    color: #c5c0c0;
+    padding-right: 35px;
+}
+
+nav a:nth-of-type(2), nav a:hover, .login a:hover {
+    color: #22cae5;
+    text-shadow: 2px 2px 5px #22cae5;
+}
+.come{
+    float: right;
+    text-align: right;
+    margin-top: 15px;
+}
+.come p{
+    font-size: 18px;
+    color: #007788;
+    font-family:方正粗黑宋简体;
+}
+.come span{
+    color: #666666;
+    font-size: 24px;
+}
+/*.login {
+    height: 60px;
+    width: 100px;
+    display: inline-block;
+    position: relative;
+    left: 3%;
+}
+
+.login i {
+    height: 30px;
+    width: 30px;
+    display: inline-block;
+    position: relative;
+    top: 9px;
+    left: -10px; !*图标位置调整*!
+    background: url("../images/sprite.png") no-repeat;
+}
+
+.login a {
+    color: #999;
+    line-height: 60px;
+    padding-left: 6px;
+}*/
+/**********************************header end **************************/
+/*banner start */
+.banner{
+    overflow: hidden;
+    width: 100%;
+    height: 700px;
+    background:  url("../image/banner1.jpg") no-repeat;
+    background-size: cover;
+    text-align: center;
+}
+.banner .im {
+    width: 300px;
+    height: 300px;
+    margin: 350px auto 0;
+}
+.banner .im h2{
+    text-align: center;
+    font-size: 50px;
+    font-family: 楷体;
+    line-height: 1.75em;
+    color: rgba(19, 218, 218, 0.74);
+}
+.banner .im i{
+    margin: 0 auto;
+    display: block;
+    width: 128px;
+    height: 2px;
+    background: #ec54e3;
+}
+.banner .im  b{
+    display: block;
+    font-size: 22px;
+    font-family: 仿宋;
+    margin-top:20px ;
+    color: #e8cccc;
+}
+/*banner end*/
+/**********************************content end **************************/
+.content{
+    margin: 20px auto 0;
+    width: 80%;
+    height: 1080px;
+}
+.index{
+    margin-top: 10px;
+    width: 24%;
+    height: 1064px;
+    background: #c5c0c0;
+    float:left;
+}
+.index ul{
+    width: 80%;
+    height: 100%;
+    margin: auto;
+}
+.index ul li a{
+    display: block;
+    font:normal bolder 18px '方正粗黑宋简体';
+    padding-top:20px;
+    text-align: center;
+    color: #ffffff;
+}
+.index ul li:first-child{
+    text-align: center;
+    font-size: 20px;
+    padding-top:30px;
+    text-shadow: 2px 2px 5px red;
+}
+.index ul li a:hover,.index ul li a:active{
+    font:normal bolder 18px '方正粗黑宋简体';
+    padding-top:20px;
+    text-align: center;
+    color:#666666;
+}
+
+
+.main{
+    width:75%;
+    height: 100%;
+    overflow: auto;
+    float:right;
+
+}
+.main .omg {
+    width: 32%;
+    height: 250px;
+    float: left;
+    text-align: center;
+    background: #ffffff;
+
+}
+.main .omg1{
+     margin:10px 0 10px 10px;
+ }
+.main .omg2{
+    margin:10px;
+}
+
+.main .omg3{
+    margin:10px 0;
+}
+
+.main .play{
+    width: 100%;
+    height:70%;
+    overflow: hidden;
+}
+/*.main .play  a{
+    display: inline-block;
+}*/
+.main .play img {
+    display: block;
+    width:100%;
+    height: 100%;
+    transition: all 0.5s;
+}
+.main .play img:hover{
+    transform: scale(1.4);
+}
+.main .omg h3{
+    margin: 10px 0 15px;
+    font-size: 15px;
+}
+
+.main .omg  a.replace{
+    padding: 3px 20px;
+    font: normal bolder 14px "新宋体";
+    color: #007788;
+    border:1px solid #007788;
+    border-radius: 12px;
+}
+.main .omg a:hover, .main .omg a:active{
+    padding: 5px 20px;
+    font-size: 14px;
+    color: #5d3f3f;
+    border:1px solid rgba(210, 103, 103, 0.22);
+}
+
+
+
+/**********************************footer start**************************/
+.footer {
+    margin-top: 10px;
+    width: 100%;
+    height: 150px;
+    background-color: #30416e;
+    padding: 40px 75px 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+.footer .copy {
+    margin: auto;
+    padding: 20px 100px 0;
+    box-sizing: border-box;
+    color: #e8cccc;
+    width: 100%;
+    float: left;
+}
+.footer .copy p{
+    width: 100%;
+    text-align: center;
+}
+.footer .copy p span:hover {
+    color: #333;
+    cursor: pointer;
+}
+/**********************************footer end**************************/

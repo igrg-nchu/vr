@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> hdr </title>
+  <style>
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<script type="text/javascript" src="../../libs2/three2.js"></script>
+<script type="text/javascript" src="../../libs2/OBJLoader.js"></script>
+<script src="js/three.js-r144/examples/js/loaders/RGBELoader.js"></script>
+<script type="text/javascript" src="../../libs2/OrbitControls.js"></script>
+<script>
+  let scene,camera,renderer,controls
+
+  function init() {
+    // 创建绘制上下文
+    renderer = new THREE.WebGLRenderer({
+      antialias:true,
+      //alpha:true
+    });
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.gammaOutput = true;
+    renderer.shadowMap.enabled = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.outputEncoding = THREE.sRGBEncoding
+    renderer.toneMappingExposure = 2.2;
+    document.body.appendChild(renderer.domElement)
+
+    // 创建场景
+    scene = new THREE.Scene();
+    //scene.background = new THREE.Color(0xFFdddd);
+
+    // 加载hdr
+    const hdrUrl = './res/hdr/rainforest_trail_4k.hdr'
+    new THREE.RGBELoader().load(hdrUrl, texture => {
+      const gen = new THREE.PMREMGenerator(renderer)
+      const envMap = gen.fromEquirectangular(texture).texture
+      scene.environment = envMap
+      scene.background = envMap
+
+      texture.dispose()
+      gen.dispose()
+    })
+
+
+    // 创建摄像头
+    camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,5000);
+    camera.position.set(0,30,30);
+    controls = new THREE.OrbitControls(camera,renderer.domElement);
+
+
+    // 加载3D模型
+    new THREE.GLTFLoader().load('./res/3dmodel/scene.gltf', result => {
+      model = result.scene.children[0];
+      model.position.set(0,-5,-5);
+      model.traverse(n => {
+        if ( n.isMesh ) {
+          n.castShadow = true;
+          n.receiveShadow = true;
+          if(n.material.map)
+            n.material.map.anisotropy = 1;
+        }
+      });
+      scene.add(model);
+    });
+
+    window.addEventListener( 'resize', onWindowResize, false );
+  }
+
+  function animate() {
+    requestAnimationFrame(animate)
+    controls.update()
+    renderer.render(scene,camera)
+
+  }
+
+  init();
+  animate()
+
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+  }
+
+</script>
+</body>
+</html>

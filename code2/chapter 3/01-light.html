@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>3-01</title>
+    <script type="text/javascript" src="../../libs/three2.js"></script>
+
+    <script type="text/javascript" src="../../libs/stats.js"></script>
+    <script type="text/javascript" src="../../libs/dat.gui.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+
+        var stopMovingLight = false;
+
+        var stopMovingDirectLight = false;
+
+        var stats = initStats();
+
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        var scene = new THREE.Scene();
+
+        // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // create a render and set the size
+        var renderer = new THREE.WebGLRenderer();
+
+        renderer.setClearColor(new THREE.Color(0xEEEEEE));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapType = THREE.PCFShadowMap;
+
+        // create the ground plane
+        var planeGeometry = new THREE.PlaneGeometry(180, 180);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+
+        // rotate and position the plane
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15,0,0);
+        scene.add(plane);
+
+
+        var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+
+        for (var j = 0; j < (planeGeometry.parameters.height / 5); j++) {
+            for (var i = 0; i < planeGeometry.parameters.width / 5; i++) {
+                var rnd = Math.random() ;
+                var cubeMaterial = new THREE.MeshLambertMaterial();
+                cubeMaterial.color = new THREE.Color(rnd,0,rnd);
+                var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+                cube.position.z = -((planeGeometry.parameters.height) / 2) + 2 + (j * 5);
+                cube.position.x = -((planeGeometry.parameters.width) / 2) + 2 + (i * 5);
+                cube.position.y = 2;
+
+                scene.add(cube);
+            }
+        }
+        var cube2Geometry = new THREE.BoxGeometry(5, 5, 5);
+        var cube2Material = new THREE.MeshLambertMaterial();
+        cube2Material.color = new THREE.Color(255,255,255);
+        var cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+
+        // position the cube
+        cube2.position.set(-4,8,0);
+
+        // 平行光
+        var directColor = "#ffffff";
+        var directionalLight = new THREE.DirectionalLight(directColor);
+        directionalLight.position.set(-40, 60, -10);
+        directionalLight.castShadow = true;
+        directionalLight.shadowCameraNear = 2;
+        directionalLight.shadowCameraFar = 200;
+        //directionalLight.shadowCameraLeft = -50;
+        directionalLight.shadowCameraRight = 50;
+        directionalLight.shadowCameraTop = 50;
+        directionalLight.shadowCameraBottom = -50;
+
+        directionalLight.distance = 0;
+        directionalLight.intensity = 0.5;
+        directionalLight.shadowMapHeight = 1024;
+        directionalLight.shadowMapWidth = 1024;
+
+
+        scene.add(directionalLight);
+        // add the cube to the scene
+        scene.add(cube2);
+
+        var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xf0000f});
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        // position the sphere
+        sphere.position.set(20, 0, 2);
+        sphere.castShadow = true;
+
+        // add the sphere to the scene
+        scene.add(sphere);
+
+        // position and point the camera to the center of the scene
+        camera.position.set(-70, 60, 50);
+        camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+        // add subtle ambient lighting
+        var ambiColor = "#1c1c1c";
+        var ambientLight = new THREE.AmbientLight(ambiColor);
+        scene.add(ambientLight);
+
+        // add spotlight for a bit of light
+        var spotLight0 = new THREE.SpotLight(0xcccccc);
+        spotLight0.position.set(-40, 30, -10);
+        spotLight0.lookAt(plane);
+        scene.add(spotLight0);
+
+
+        var target = new THREE.Object3D();
+        target.position = new THREE.Vector3(5, 0, 0);
+
+
+        var spotColor = "#ffffff";
+        var spotLight = new THREE.SpotLight(spotColor);
+        spotLight.position.set(-40, 60, -10);
+        spotLight.castShadow = true;
+        spotLight.shadowCameraNear = 2;
+        spotLight.shadowCameraFar = 200;
+        spotLight.shadowCameraFov = 30;
+        spotLight.target = plane;
+        spotLight.distance = 0;
+        spotLight.angle = 0.4;
+
+
+        scene.add(spotLight);
+
+
+        // add a small sphere simulating the spotlight
+        var sphereLight = new THREE.SphereGeometry(0.2);
+        var sphereLightMaterial = new THREE.MeshBasicMaterial({color: 0xac6c25});
+        var sphereLightMesh = new THREE.Mesh(sphereLight, sphereLightMaterial);
+        sphereLightMesh.castShadow = true;
+
+        sphereLightMesh.position = new THREE.Vector3(3, 20, 3);
+        scene.add(sphereLightMesh);
+
+        //加入太阳光源
+        var directLight = new THREE.SphereGeometry(0.2);
+        var directLightMaterial = new THREE.MeshBasicMaterial({color: 0xac6c25});
+        var directLightMesh = new THREE.Mesh(directLight, directLightMaterial);
+        directLightMesh.castShadow = true;
+
+        directLightMesh.position = new THREE.Vector3(3, 20, 3);
+        //scene.add(directLightMesh);
+
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+        // call the render function
+        var step = 0;
+
+        // used to determine the switch point for the light animation
+        var invert = 1;
+        var phase = 0;
+
+        var controls = new function () {
+            this.rotationSpeed = 0.03;
+            this.bouncingSpeed = 0.03;
+            this.ambientColor = ambiColor;
+            this.spotColor = spotColor;
+            this.intensity = 1;
+            this.distance = 0;
+            this.exponent = 30;
+            this.angle = 0.1;
+            this.debug = false;
+            this.castShadow = true;
+            this.onlyShadow = false;
+            this.target = "Plane";
+            this.stopMovingLight = false;
+            this.directColor = directColor;
+            this.stopMovingDirectLight = false;
+
+        };
+
+        var gui = new dat.GUI();
+        gui.addColor(controls, 'ambientColor').onChange(function (e) {
+            ambientLight.color = new THREE.Color(e);
+        });
+
+        gui.addColor(controls, 'spotColor').onChange(function (e) {
+            spotLight.color = new THREE.Color(e);
+        });
+
+        gui.add(controls, 'angle', 0, Math.PI * 2).onChange(function (e) {
+            spotLight.angle = e;
+        });
+
+        gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
+            spotLight.intensity = e;
+        });
+
+        gui.add(controls, 'distance', 0, 200).onChange(function (e) {
+            spotLight.distance = e;
+        });
+
+        gui.add(controls, 'exponent', 0, 100).onChange(function (e) {
+            spotLight.exponent = e;
+        });
+
+        gui.add(controls, 'debug').onChange(function (e) {
+            spotLight.shadowCameraVisible = e;
+        });
+
+        gui.add(controls, 'castShadow').onChange(function (e) {
+            spotLight.castShadow = e;
+        });
+
+        gui.add(controls, 'onlyShadow').onChange(function (e) {
+            spotLight.onlyShadow = e;
+        });
+
+        gui.addColor(controls, 'directColor').onChange(function (e) {
+            directionalLight.color = new THREE.Color(e);
+        });
+
+        gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
+            directionalLight.intensity = e;
+        });
+
+        gui.add(controls, 'distance', 0, 200).onChange(function (e) {
+            directionalLight.distance = e;
+        });
+
+        gui.add(controls, 'debug').onChange(function (e) {
+            directionalLight.shadowCameraVisible = e;
+        });
+
+        gui.add(controls, 'castShadow').onChange(function (e) {
+            directionalLight.castShadow = e;
+        });
+
+        gui.add(controls, 'onlyShadow').onChange(function (e) {
+            directionalLight.onlyShadow = e;
+        });
+
+        gui.add(controls, 'target', ['Plane', 'Sphere', 'Cube']).onChange(function (e) {
+            console.log(e);
+            switch (e) {
+                case "Plane":
+                    spotLight.target = plane;
+                    break;
+                case "Sphere":
+                    spotLight.target = sphere;
+                    break;
+                case "Cube":
+                    spotLight.target = cube;
+                    break;
+            }
+
+        });
+
+        gui.add(controls, 'stopMovingLight').onChange(function (e) {
+            stopMovingLight = e;
+        });
+
+        gui.add(controls, 'stopMovingDirectLight').onChange(function (e) {
+            stopMovingDirectLight = e;
+        });
+
+
+        render();
+
+        function render() {
+            stats.update();
+            // rotate the cube around its axes
+            cube2.rotation.x += controls.rotationSpeed;
+            cube2.rotation.y += controls.rotationSpeed;
+            cube2.rotation.z += controls.rotationSpeed;
+
+            // bounce the sphere up and down
+            step += controls.bouncingSpeed;
+            cube2.position.x = ( 10 * (Math.cos(step)));
+            cube2.position.y = 8 + ( 10 * (Math.abs(Math.sin(step))));
+            sphere.position.z = ( 10 * (Math.cos(step)));
+            sphere.position.y = 8+ ( 10 * Math.abs(Math.sin(step)));
+
+            // move the light simulation
+            if (!stopMovingLight) {
+                if (phase > 2 * Math.PI) {
+                    invert = invert * -1;
+                    phase -= 2 * Math.PI;
+                } else {
+                    phase += controls.rotationSpeed;
+                }
+                sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
+                sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
+                sphereLightMesh.position.y = 10;
+
+                if (invert < 0) {
+                    var pivot = 14;
+                    sphereLightMesh.position.x = (invert * (sphereLightMesh.position.x - pivot)) + pivot;
+                }
+
+                spotLight.position.copy(sphereLightMesh.position);
+
+
+            }
+
+            if (!stopMovingDirectLight) {
+
+                phase += controls.rotationSpeed;
+                directLightMesh.position.y = 20 + (10 * (Math.sin(phase)));
+                directLightMesh.position.x = 19 + (10 * (Math.cos(phase)));
+                directLightMesh.position.z = 10;
+
+                if (invert < 0) {
+                    var pivot = 14;
+                    directLightMesh.position.x = (invert * (directLightMesh.position.x - pivot)) + pivot;
+                }
+
+                directionalLight.position.copy(directLightMesh.position);
+
+
+            }
+
+
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+
+
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+        }
+    }
+
+    window.onload = init;
+
+
+</script>
+</body>
+</html>

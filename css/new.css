@@ -1,0 +1,15 @@
+
+p{
+    width: 200px;
+    height: 200px;
+    padding: 20px;
+    margin: 100px auto;
+    border: black solid 16px;
+    background: #e8340e;
+}
+img{
+    width: 100px;
+    height: 100px;
+    margin:0 auto;
+    display: block;
+}
